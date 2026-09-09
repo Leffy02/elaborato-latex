@@ -1,0 +1,40 @@
+\chapter*{Sommario} % senza numerazione
+\label{sommario}
+
+\addcontentsline{toc}{chapter}{Sommario} % da aggiungere comunque all'indice
+
+L'interazione tra linguaggio naturale e database relazionali rappresenta
+una delle sfide più rilevanti nell'ambito dell'Intelligenza Artificiale
+applicata. Questa tesi presenta lo sviluppo di un framework avanzato di
+Text-to-SQL progettato per ottimizzare la generazione di query
+attraverso un approccio modulare e iterativo.
+
+A differenza dei modelli tradizionali, il sistema implementato si basa
+su un'architettura a doppia orchestrazione: lo
+\texttt{SchemaOrchestrator}, dedicato alla ricostruzione semantica e
+all'acquisizione della struttura del database, e il
+\texttt{QueryOrchestrator}, responsabile della generazione e
+raffinamento del codice SQL. Un elemento distintivo della ricerca è
+l'integrazione di tecniche di Retrieval-Augmented Generation (RAG)
+tramite componenti di storage vettoriale (\texttt{SchemaStore} e
+\texttt{QueryStore}), che permettono al sistema di mantenere una memoria
+storica delle interrogazioni passate e dei relativi fallimenti.
+
+Il cuore innovativo del lavoro risiede nel ciclo di feedback
+automatizzato: il sistema non si limita a produrre un output, ma esegue
+una validazione sintattica e semantica in tempo reale. In caso di
+errore, un modulo di analisi (\texttt{LLMFeedback}) categorizza
+l'anomalia, fornendo istruzioni mirate al modello per la correzione
+autonoma. I risultati dimostrano come l'uso combinato
+di prompt ingegnerizzati, contestualizzazione dinamica dello schema e
+apprendimento dagli errori pregressi aumenti significativamente
+l'affidabilità delle query generate, portando in media il \(21,54\%\) di successi in più, riducendo la distanza tra l'intento
+dell'utente e l'esecuzione tecnica su database eterogenei.
+
+\section*{Uso di strumenti di Intelligenza Artificiale}
+
+Per lo sviluppo del progetto di tesi sono stati impiegati strumenti di Intelligenza Artificiale,
+in particolare durante la fase di elaborazione del codice è stato utilizzato ChatGPT \cite{chatgpt} ed il suo tool integrato
+Codex \cite{openai_codex} per organizzare la struttura e la generazione di alcune formule ausiliarie. 
+Per quanto riguarda la stesura del testo, è stato sfruttato NotebookLLM \cite{google_notebooklm} per la raccolta, gestione e traduzione delle fonti
+mentre l'utilizzo di Google Gemini \cite{google_gemini} ha permesso di controllare la correttezza dal punto di vista grammaticale e ortografico del testo.

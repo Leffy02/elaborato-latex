@@ -1,0 +1,167 @@
+\chapter{Introduzione} % senza numerazione
+\label{cha:introduzione}
+
+Nell'attuale era digitale, i dati rappresentano la risorsa strategica
+centrale per ogni tipo di organizzazione, dalla sanità al commercio, fino
+allo sport professionistico. Nonostante i database relazionali (RDBMS)
+siano il motore dinamico della ricerca scientifica e del business, il
+loro accesso è ancora limitato dalla barriera tecnica del linguaggio
+SQL.
+
+\section{Presentazione del
+problema}\label{presentazione-del-problema}
+
+La necessità di una sintassi rigorosa rende i dati accessibili quasi
+esclusivamente a figure specializzate, costringendo gli utenti non
+tecnici (manager, medici o analisti) a dipendere dai reparti IT. Questa
+intermediazione genera inefficienze critiche: rallentamenti decisionali,
+elevati costi di formazione e il rischio di incomprensioni tra chi pone
+la domanda e chi scrive il codice, lasciando spesso inespresso il reale
+potenziale del patrimonio informativo aziendale. La spinta principale di
+questo lavoro risiede nella democratizzazione dell'accesso ai dati. In
+un mercato che richiede risposte immediate, è essenziale trasformare i
+database da archivi statici in strumenti di conversazione aperti a
+tutti. Automatizzare la traduzione in SQL significa garantire autonomia
+decisionale e migliorare l'efficienza operativa: il valore di
+un'intuizione non deve più essere limitato dalla conoscenza del codice,
+ma solo dalla capacità umana di porre le domande giuste. Il settore del
+Text-to-SQL è stato rivoluzionato dai Large Language Models (LLM).
+Sebbene modelli generalisti come GPT-4 abbiano aperto la strada,
+l'attenzione si è oggi spostata su soluzioni specializzate come
+Qwen-Coder o modelli fine-tuned come SQLCoder, capaci di gestire schemi
+complessi con maggiore precisione. Parallelamente, l'introduzione della
+tecnica RAG (Retrieval-Augmented Generation) ha segnato un punto di
+svolta, permettendo al sistema di ``recuperare'' metadati e la
+documentazione per costruire prompt contestualizzati. Questo approccio
+riduce le allucinazioni dell'IA e permette ai modelli di adattarsi a
+database specifici senza necessità di riaddestramento. Tale evoluzione
+ha favorito la nascita di strumenti pronti all'uso come Text2SQL o
+AskYourDatabase, che iniziano a integrare queste tecnologie con
+interfacce intuitive per l'utente finale.
+
+\section{Obiettivi e Risultati
+Attesi}\label{obiettivi-e-risultati-attesi}
+
+L'obiettivo principale di questo lavoro di tesi risiede nello sviluppo,
+nell'implementazione e nella validazione sperimentale di un sistema
+modulare a oggetti in linguaggio Python. Tale sistema ingegnerizzato deve tradurre in
+modo efficace e sintatticamente coerente richieste formulate in
+linguaggio naturale in interrogazioni SQL direttamente eseguibili su un
+DBMS target. Il nucleo del progetto si focalizza sulla creazione di uno
+strato software strutturato che opera come ponte tra l'utente (o
+un'applicazione client) e la complessità intrinseca degli schemi
+relazionali, garantendo un'elevata precisione nella mappatura tra i
+concetti espressi verbalmente e le strutture logiche delle tabelle.
+
+L'intento è fornire uno strumento flessibile, disaccoppiato e facilmente
+integrabile in ecosistemi software preesistenti, abilitando piattaforme
+terze a implementare funzionalità di analisi dati in modalità
+self-service. Attraverso l'impiego di modelli di linguaggio avanzati
+(LLM) e di tecniche evolute di gestione del contesto, l'obiettivo finale
+dimostra la fattibilità dell'abbattimento della barriera tecnica del
+codice, trasformando l'interrogazione dei dati in un processo immediato,
+sicuro e accessibile.
+
+Per conseguire questo traguardo, il lavoro di ricerca e sviluppo si
+articola in una serie di obiettivi intermedi focalizzati
+sull'automazione del workflow di traduzione, esecuzione e raffinamento:
+
+\begin{itemize}
+\item
+  \textbf{Estrazione e normalizzazione dello schema:} Automatizzare la
+  mappatura del database target sia tramite connessione diretta e
+  recupero dei metadati dizionariali, sia attraverso l'induzione e la
+  normalizzazione di input non strutturati (istruzioni DDL) in un
+  formato JSON standardizzato, successivamente indicizzato all'interno
+  di un database vettoriale.
+\item
+  \textbf{Ottimizzazione del contesto:} Ridurre la finestra di calcolo
+  (context window) dei modelli linguistici estraendo
+  dinamicamente, tramite euristiche di recupero vettoriale, solo le
+  entità strettamente necessarie all'intento espresso dall'utente,
+  arricchendo lo schema con regole di business e metadati
+  extrastrutturali.
+\item
+  \textbf{Generazione tramite prompt dinamici:} Sviluppare un motore di
+  compilazione dei prompt che aggrega algoritmicamente schemi
+  relazionali, percorsi di giunzione (join paths) e lo storico
+  dei fallimenti passati, garantendo il completo disaccoppiamento logico
+  dai modelli linguistici sottostanti.
+\item
+  \textbf{Validazione e raffinamento iterativo (Refinement):}
+  Implementare un ciclo di feedback a ciclo chiuso che verifica a
+  runtime la conformità sintattica ed esecutiva della query prodotta,
+  intercettando le eccezioni sollevate dal database per guidare un
+  processo autonomo di auto-correzione.
+\item
+  \textbf{Esposizione architetturale tramite API:} Ingegnerizzare
+  l'applicazione separando nettamente la logica di backend dal frontend,
+  esponendo le funzionalità di generazione query e di supervisione
+  critica attraverso endpoint programmabili e facilmente interrogabili.
+\end{itemize}
+
+Dal punto di vista prettamente ingegneristico, il progetto si
+concretizza nella realizzazione di un modulo API robusto e scalabile,
+distribuito sotto forma di un pacchetto Python documentato e pronto
+all'uso. Tale soluzione è concepita per essere integrata agevolmente in
+applicazioni esterne, quali dashboard di Business Intelligence o agenti
+conversazionali aziendali, dimostrando versatilità nel gestire schemi
+relazionali eterogenei.
+
+Un risultato chiave del framework è rappresentato dall'ottimizzazione
+del contesto tramite metodologie RAG (\emph{Retrieval-Augmented
+Generation}). L'efficacia del sistema di recupero e l'integrazione
+dinamica dello schema nel prompt consentono al modello di operare con
+successo anche su database non inclusi nella fase di addestramento
+iniziale, puntando ad ottenere una notevole capacità di generalizzazione in
+modalità zero-shot.
+
+A completamento dello sviluppo, l'intera impalcatura software è
+sottoposta a una massiccia campagna di test basata sui principali
+benchmark scientifici del settore, quali Spider e BIRD. Attraverso di essi
+sono stati ottenuti risultati quantitativi e qualitativi che rivelano
+quali dei requisiti sono stati raggiunti dal framework. 
+Il principale traguardo consiste nel raggiungimento di
+un'elevata accuratezza nella traduzione (Execution Accuracy),
+minimizzando i fenomeni di allucinazione dei modelli e garantendo che il
+codice SQL prodotto sia pronto per l'esecuzione sul database target
+senza interventi manuali. Di conseguenza, il sistema persegue una netta
+riduzione della barriera tecnica nell'accesso ai dati, semplificando i
+processi di analisi e permettendo a utenti non esperti di estrarre
+informazioni complesse in tempo reale, diminuendo la dipendenza da
+intermediari tecnici.
+
+\section{Struttura della Tesi}\label{struttura-della-tesi}
+
+Il presente elaborato è organizzato in capitoli, strutturati secondo un
+percorso logico che spazia dall'inquadramento teorico fino alla
+validazione empirica sul campo:
+
+\begin{itemize}
+\item
+  \textbf{Capitolo 2 --- Stato dell'arte e Background:} descrive
+  l'evoluzione tecnologica dei Large Language Models e analizza lo stato
+  dell'arte delle metodologie Text-to-SQL e dei database vettoriali. Il
+  capitolo include una rassegna critica dei principali strumenti
+  commerciali attualmente disponibili sul mercato, evidenziandone i
+  limiti strutturali a cui il presente lavoro intende rispondere.
+\item
+  \textbf{Capitolo 3 --- Soluzione proposta:} illustra nel dettaglio
+  l'architettura ingegnerizzata a oggetti, descrivendo le responsabilità
+  dello \texttt{SchemaOrchestrator} e del \texttt{QueryOrchestrator}.
+  Vengono analizzati i flussi logici del back-end FastAPI e
+  l'interfaccia di front-end in React concepita per l'interazione con
+  l'utente finalizzandone i casi d'uso.
+\item
+  \textbf{Capitolo 4 --- Test e valutazioni:} espone la metodologia
+  sperimentale adottata per la validazione del framework sui benchmark
+  internazionali Spider e BIRD. In questa sezione vengono analizzati in
+  modo esaustivo i risultati quantitativi ottenuti su molteplici modelli
+  ed ecosistemi di database, arricchendo la trattazione con uno studio
+  inferenziale e statistico delle correlazioni.
+\item
+  \textbf{Capitolo 5 --- Conclusione:} riassume i principali traguardi
+  conseguiti in relazione ai requisiti progettuali e delinea le
+  promettenti traiettorie di ricerca future volte all'ottimizzazione del
+  sistema.
+\end{itemize}

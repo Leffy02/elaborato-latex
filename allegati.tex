@@ -1,0 +1,347 @@
+\chapter{Prompt Ingegnerizzati}
+\label{app:prompts}
+
+In questo allegato vengono riportati i testi integrali dei prompt di sistema implementati all'interno della classe \texttt{PromptBuilder} nel backend dell'applicazione. Questi costrutti rappresentano il nucleo logico della componente di \textit{Prompt Engineering} della tesi. Ciascun prompt viene compilato dinamicamente a runtime iniettando le variabili contestuali estratte dagli orchestratori e dai \textit{vector store}. I sorgenti aggiornati e i relativi metodi di assemblaggio sono consultabili nella repository ufficiale del progetto \cite{github_project} all'interno del file \texttt{prompt\_builder.py}.
+
+Al fine di preservare l'esatta semantica interpretata dai modelli linguistici ed evitare alterazioni interpretative delle richieste di, tutti i prompt somministrati agli LLM agenti e valutatori sono stati ingegnerizzati in lingua inglese.
+
+% ==========================================
+% SECTION 1: SCHEMA GENERATION
+% ==========================================
+\section{Prompt per la Generazione dello Schema}
+Il seguente prompt impiegato per istruire il modello linguistico a convertire le istruzioni DDL (Data Definition Language) fornite dall'utente in uno schema relazionale normalizzato in formato JSON.
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \texttt{schema\_generation\_prompt}}, label={lst:prompt_schema_gen}]
+You are an expert database schema analyzer. Your task is to convert SQL DDL statements into a structured JSON schema.
+
+IMPORTANT:
+- You MUST return ONLY valid JSON.
+- The JSON must be syntactically correct (no missing commas, braces, or quotes).
+- Every object and array must be properly closed.
+- Do NOT include comments, code blocks, or explanations.
+
+Required JSON format:
+{
+"tables": [
+    {
+    "name": "table_name",
+    "columns": [
+        {"name": "column_name", "type": "SQL_TYPE", "constraints": ["PRIMARY KEY", "NOT NULL", ...]}
+    ]
+    }
+]
+}
+
+Rules:
+- Extract table names from CREATE TABLE statements
+- Extract column names, types, and constraints
+- Map SQL types directly (VARCHAR2 -> VARCHAR2, NUMBER -> NUMBER, etc.)
+- Include constraints like PRIMARY KEY, NOT NULL, UNIQUE, DEFAULT, REFERENCES
+- For foreign keys, use "REFERENCES" constraint
+
+SQL DDL to process:
+"""{raw_schema_text}"""
+
+Return ONLY the JSON object:
+\end{lstlisting}
+
+% ==========================================
+% SECTION 2: SCHEMA UPDATE
+% ==========================================
+\section{Prompt per l'Aggiornamento dello Schema}
+Qualora l'utente richieda una modifica o un'integrazione strutturale allo schema esistente, il metodo \texttt{schema\_update\_prompt} esegue un'operazione di fusione logica senza compromettere la conoscenza canonical precedentemente acquisita.
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \texttt{schema\_update\_prompt}}, label={lst:prompt_schema_update}]
+You are an expert database schema analyst.
+
+You have been provided with:
+1. The CURRENT canonical schema (JSON format)
+2. NEW text describing additional tables or modifications to existing tables
+
+Your task:
+- Analyze the new text to identify any NEW tables or MODIFIED columns in existing tables
+- Preserve all existing tables and columns from the current schema
+- Add only the NEW tables or merge modifications into existing tables
+- Return a SINGLE, complete JSON schema that includes both the current schema and the updates
+
+IMPORTANT RULES:
+- Do NOT remove any existing tables or columns
+- If a table already exists, ADD new columns or UPDATE existing ones (don't duplicate)
+- Maintain the same JSON structure: {"database": "<database_name>", "tables": [...], "semantic_notes": [...]}
+- Return ONLY the updated JSON schema, no other text or explanations
+- Each table must have: "name", "columns" (array)
+- Each column must have: "name", "type", "constraints" (array)
+
+=== CURRENT SCHEMA ===
+{current_schema}
+
+=== NEW TEXT ===
+{raw_schema_text}
+
+Return the UPDATED schema JSON:
+\end{lstlisting}
+
+% ==========================================
+% SECTION 3: QUERY GENERATION
+% ==========================================
+\section{Prompt per la Traduzione Text-to-SQL}
+Il prompt d'area \texttt{query\_generation\_prompt} costituisce il componente core del sistema di traduzione. Esso aggrega il contesto relazionale parziale, le richieste utente, i suggerimenti sulle chiavi esterne (*join hints*) e lo storico dei fallimenti passati, imponendo catene di vincoli stringenti per mitigare i fenomeni di allucinazione.
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \texttt{query\_generation\_prompt}}, label={lst:prompt_query_gen}]
+You are an expert SQL database assistant.
+You will be provided with:
+1. The partial description of the database schema (only the relevant tables)
+2. The user's request in natural language.
+3. Examples of previous SQL failures to correct
+
+Your task is to return a **single SQL query** that satisfies the request,
+using the provided tables and columns.
+
+=== REQUEST ===
+{user_request}
+
+=== SCHEMA ===
+{schema_context}
+
+[Se presenti, il PromptBuilder inietta qui i JOIN PATH HINTS]
+
+IMPORTANT CONSTRAINTS BASED ON PAST FAILURES:
+- Do NOT use columns outside the schema
+- Do NOT invent field or table names that don't exist.
+- Always qualify columns when joining
+- Do NOT use SELECT *
+- Do NOT add WHERE clauses or conditions unless explicitly requested.
+- Do NOT join tables unless necessary for the request.
+- If using aggregates, include GROUP BY
+- The sql query must be executable on a {engine.upper()} database.
+
+[Se presenti, il PromptBuilder inietta qui la sezione PREVIOUS QUERY ERROR TO FIX]
+
+Before writing the SQL query, internally determine:
+- Which tables are required
+- How they are joined
+- Whether aggregation or grouping is required
+- Which columns are selected
+
+Do NOT output this reasoning.
+Only output the final SQL query.
+
+SQL QUERY (DO NOT ADD COMMENTS OR EXPLANATION TEXT BEFORE AND AFTER THE QUERY):
+\end{lstlisting}
+
+% ==========================================
+% SECTION 4: EXPLANATION AND EVALUATION
+% ==========================================
+\section{Prompt per il Feedback dei Circuiti di Valutazione}
+In questa sezione vengono riportati i prompt associati al modulo \texttt{LLM Evaluator}, impiegati per la diagnostica d'errore a runtime (\ref{lst:prompt_explanation}) e per la validazione semantica a ciclo chiuso dei record estratti (\ref{lst:prompt_evaluation}).
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \texttt{explanation\_prompt}.}, label={lst:prompt_explanation}]
+You are an expert SQL debugger.
+Explain why the following SQL query produced this runtime error.
+Be concise and do NOT rewrite the query.
+
+--- CONTEXT ---
+{context}
+
+--- SQL QUERY ---
+{sql}
+
+--- RUNTIME ERROR ---
+{execution_output}
+
+Provide a clear explanation of the cause.
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \texttt{evaluation\_prompt}.}, label={lst:prompt_evaluation}]
+You are an expert SQL reviewer.
+
+Your task is to evaluate whether the SQL query correctly answers
+the user's request, based ONLY on the query results shown.
+
+--- CONTEXT ---
+{context}
+
+--- USER REQUEST ---
+{request}
+
+--- SQL QUERY ---
+{sql}
+
+--- QUERY RESULT (first 20 rows) ---
+{rows_text}
+
+--- INSTRUCTIONS ---
+Respond in EXACTLY one of the following formats:
+
+1) If the query is correct:
+CORRECT_QUERY
+
+2) If the query is incorrect:
+INCORRECT_QUERY: <clear explanation of what is wrong and how to fix it>
+
+Rules:
+- Do NOT rewrite the full SQL query.
+- Be concise and precise.
+- Judge correctness, not syntax or performance.
+\end{lstlisting}
+
+% ==========================================
+% SECTION 5: UTILITY AND BENCHMARKING
+% ==========================================
+\section{Prompt Ausiliari e di Benchmarking}
+Infine, si riportano i prompt secondari utilizzati rispettivamente per la classificazione euristica dell'input utente in fase di update (\ref{lst:prompt_classification}) e per la validazione automatizzata dei risultati sperimentali a fronte dei dataset di benchmark (\ref{lst:prompt_judge}).
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \text{update\_classification\_prompt}.}, label={lst:prompt_classification}]
+System: You are an assistant that classifies schema updates.
+User: Text provided by the user:
+{text}
+
+Question: is this text
+(A) a structural modification (addition or change of tables/columns/types)?
+(B) a description or semantic note?
+Answer only with "A" or "B".
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, frame=single, breaklines=true, caption={Struttura del prompt \texttt{llm\_judge\_prompt}.}, label={lst:prompt_judge}]
+You are judging whether a predicted SQL query should be considered correct for a Spider-style text-to-SQL example.
+
+Database id: {database_name}
+Question: {question}
+
+Gold query:
+{gold_report.sql_code}
+
+Gold query result:
+{gold_report._format_query_session_result()}
+
+Predicted query:
+{pred_report.sql_code}
+
+Predicted query result:
+{pred_report._format_query_session_result()}
+
+Decide whether the predicted query is semantically correct relative to the gold query and the observed execution results.
+
+Return JSON only in this format:
+{"verdict":"correct"|"incorrect","reason":"short explanation"}
+\end{lstlisting}
+
+\chapter{Video Interfaccia}
+
+\url{https://github.com/Txt2SQL/Back-End/blob/main/Preview.mp4}
+
+\chapter{Tabelle Statistiche}
+\label{app:tables}
+
+In questo allegato vengono riportate le tabelle statistiche relative ai modelli linguistici (\textit{Large Language Models}, LLM) sottoposti a scrutinio durante la fase di \textit{testing} e \textit{benchmarking}. I dati raccolti abilitano un'analisi comparativa approfondita e quantitativa delle prestazioni di ciascun modello a fronte di diversi contesti operativi. Per ogni LLM esaminato sono strutturate tre tipologie di tabelle:
+
+\begin{enumerate}
+    \item \textbf{Tabella di Status}: Offre un quadro olistico sugli esiti generativi, isolando le metriche di successo, i tempi di calcolo medi (\textit{execution latency}), il numero di tentativi richiesti e la tassonomia degli errori riscontrati (sintattici o di runtime).
+    \item \textbf{Tabella delle Correlazioni sui Tentativi (Attempts Correlations)}: Analizza la dipendenza statistica tra i tentativi andati a buon fine e la distribuzione del numero di iterazioni effettuate nel ciclo chiuso.
+    \item \textbf{Tabella delle Correlazioni sulla Complessità (Complexity Correlations)}: Evidenzia la reattività del modello al crescere della complessità intrinseca della query SQL target.
+\end{enumerate}
+
+Tutte le metriche di correlazione sono calcolate mediante i coefficienti di Pearson e Spearman, corredati dal relativo \textit{p-value} per attestarne la significatività statistica. I dataset originari in formato grezzo sono archiviati come file \texttt{.csv} nella repository ufficiale del progetto \cite{github_project}.
+
+\newcommand{\csvfittable}[1]{%
+    \begin{adjustbox}{max width=\textwidth,max totalheight=0.62\textheight,center}
+        \csvautotabular{#1}
+    \end{adjustbox}%
+}
+
+\section{Tabelle di GPT-4o}
+
+\subsection{Tabella Status}
+\label{tab:status_gpt4o}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/gpt-4o_report/status.csv}
+
+\subsection{Tabella Attempts Correlations}
+\label{tab:attempts_gpt4o}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/gpt-4o_report/attempts_correlations.csv}
+
+\subsection{Tabella Complexity Correlations}
+\label{tab:complexity_gpt4o}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/gpt-4o_report/complexity_correlations.csv}
+
+
+\section{Tabelle di GPT-5-mini}
+
+\subsection{Tabella Status}
+\label{tab:status_gpt5mini}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/gpt-5-mini_report/complexity_correlations.csv}
+
+\subsection{Tabella Attempts Correlations}
+\label{tab:attempts_gpt5mini}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/gpt-5-mini_report/attempts_correlations.csv}
+
+\subsection{Tabella Complexity Correlations}
+\label{tab:complexity_gpt5mini}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/gpt-5-mini_report/complexity_correlations.csv}
+
+
+\section{Tabelle di Codellama}
+
+\subsection{Tabella Status}
+\label{tab:status_codellama}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/codellama_34b_report/status.csv}
+
+\subsection{Tabella Attempts Correlations}
+\label{tab:attempts_codellama}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/codellama_34b_report/attempts_correlations.csv}
+
+\subsection{Tabella Complexity Correlations}
+\label{tab:complexity_codellama}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/codellama_34b_report/complexity_correlations.csv}
+
+
+\section{Tabelle di Codestral}
+
+\subsection{Tabella Status}
+\label{tab:status_codestral}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/codestral_22b_report/status.csv}
+
+\subsection{Tabella Attempts Correlations}
+\label{tab:attempts_codestral}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/codestral_22b_report/attempts_correlations.csv}
+
+\subsection{Tabella Complexity Correlations}
+\label{tab:complexity_codestral}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/codestral_22b_report/complexity_correlations.csv}
+
+
+\section{Tabelle di SQLCoder}
+
+\subsection{Tabella Status}
+\label{tab:status_sqlcoder}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/sqlcoder_34b_report/status.csv}
+
+\subsection{Tabella Attempts Correlations}
+\label{tab:attempts_sqlcoder}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/sqlcoder_34b_report/attempts_correlations.csv}
+
+\subsection{Tabella Complexity Correlations}
+\label{tab:complexity_sqlcoder}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/sqlcoder_34b_report/complexity_correlations.csv}
+
+
+\section{Tabelle di Qwen3-Coder-Next}
+
+\subsection{Tabella Status}
+\label{tab:status_qwen3}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/Qwen3-coder-next_report/status.csv}
+
+\subsection{Tabella Attempts Correlations}
+\label{tab:attempts_qwen3}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/Qwen3-coder-next_report/attempts_correlations.csv}
+
+\subsection{Tabella Complexity Correlations}
+\label{tab:complexity_qwen3}
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/Qwen3-coder-next_report/complexity_correlations.csv}
+
+
+\section{Tabella Database}
+\label{sec:tabella_database_summary}
+
+Questa tabella contiene in maniera riassuntiva i risultati ottenuti a livello di database. L'obiettivo di questa tabella è quello di aggregare i punteggi sulla complessità dei singoli database, sul piano della query e sul piano dello schema, mostrando il livello di difficoltà complessivo di ciascun database e la sua influenza sulle prestazioni dei modelli linguistici.
+
+\url{https://github.com/Txt2SQL/Back-End/blob/main/tests/output/stats/databases_report/summary.csv}

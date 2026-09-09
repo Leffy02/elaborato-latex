@@ -1,0 +1,204 @@
+\begin{thebibliography}{10}
+
+\bibitem{chatgpt}
+{OpenAI}.
+\newblock Chatgpt.
+\newblock \url{https://chat.openai.com/}.
+\newblock Ultimo accesso: 26/08/2026.
+
+\bibitem{openai_codex}
+{OpenAI}.
+\newblock Codex in chatgpt.
+\newblock \url{https://openai.com/codex/}.
+\newblock Ultimo accesso: 26/08/2026.
+
+\bibitem{google_notebooklm}
+{Google}.
+\newblock Notebooklm / gemini notebook.
+\newblock \url{https://notebooklm.google/}.
+\newblock Ultimo accesso: 26/08/2026.
+
+\bibitem{google_gemini}
+{Google}.
+\newblock Google gemini.
+\newblock \url{https://gemini.google.com/}.
+\newblock Ultimo accesso: 26/08/2026.
+
+\bibitem{geeksforgeeks2024embeddings}
+{GeeksforGeeks}.
+\newblock What are embeddings in machine learning?
+\newblock GeeksforGeeks, June 2024.
+\newblock Accessed: 2026-06-23.
+
+\bibitem{wang-etal-2024-improving-text}
+Liang Wang, Nan Yang, Xiaolong Huang, Linjun Yang, Rangan Majumder, and Furu
+  Wei.
+\newblock Improving text embeddings with large language models.
+\newblock In Lun-Wei Ku, Andre Martins, and Vivek Srikumar, editors, {\em
+  Proceedings of the 62nd Annual Meeting of the Association for Computational
+  Linguistics (Volume 1: Long Papers)}, pages 11897--11916, Bangkok, Thailand,
+  August 2024. Association for Computational Linguistics.
+
+\bibitem{thinkia2025vectordatabases}
+{Thinkia}.
+\newblock Database vettoriali per rag: alimentare la ricerca semantica per llm.
+\newblock Thinkia Blog, September 2025.
+\newblock Accessed: 2026-06-23.
+
+\bibitem{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}
+Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir
+  Karpukhin, Naman Goyal, Heinrich Küttler, Mike Lewis, Wen tau Yih, Tim
+  Rocktäschel, Sebastian Riedel, and Douwe Kiela.
+\newblock Retrieval-augmented generation for knowledge-intensive nlp tasks,
+  2021.
+
+\bibitem{gupta2024comprehensivesurveyretrievalaugmentedgeneration}
+Shailja Gupta, Rajesh Ranjan, and Surya~Narayan Singh.
+\newblock A comprehensive survey of retrieval-augmented generation (rag):
+  Evolution, current landscape and future directions, 2024.
+
+\bibitem{enwiki:1360040196}
+{Wikipedia contributors}.
+\newblock Retrieval-augmented generation --- {Wikipedia}{,} the free
+  encyclopedia.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=Retrieval-augmented_generation&oldid=1360040196},
+  2026.
+\newblock [Online; accessed 22-June-2026].
+
+\bibitem{glass2025extractiveschemalinkingtexttosql}
+Michael Glass, Mustafa Eyceoz, Dharmashankar Subramanian, Gaetano Rossiello,
+  Long Vu, and Alfio Gliozzo.
+\newblock Extractive schema linking for text-to-sql, 2025.
+
+\bibitem{khalusova2024understanding}
+Maria Khalusova.
+\newblock Understanding embedding models: make an informed choice for your rag.
+\newblock Unstructured Blog, August 2024.
+\newblock Accessed: 2026-06-23.
+
+\bibitem{hong2025nextgenerationdatabaseinterfacessurvey}
+Zijin Hong, Zheng Yuan, Qinggang Zhang, Hao Chen, Junnan Dong, Feiran Huang,
+  and Xiao Huang.
+\newblock Next-generation database interfaces: A survey of llm-based
+  text-to-sql, 2025.
+
+\bibitem{kanburoglu2024text}
+A.~Kanburo\u{g}lu and F.~B. Tek.
+\newblock Text-to-{SQL}: A methodical review of challenges and models.
+\newblock {\em Turkish Journal of Electrical Engineering and Computer
+  Sciences}, 32(3):403--419, 2024.
+\newblock DOI: \url{https://doi.org/10.55730/1300-0632.4077}.
+
+\bibitem{lei-etal-2020-examining}
+Wenqiang Lei, Weixin Wang, Zhixin Ma, Tian Gan, Wei Lu, Min-Yen Kan, and
+  Tat-Seng Chua.
+\newblock Re-examining the role of schema linking in text-to-{SQL}.
+\newblock In Bonnie Webber, Trevor Cohn, Yulan He, and Yang Liu, editors, {\em
+  Proceedings of the 2020 Conference on Empirical Methods in Natural Language
+  Processing (EMNLP)}, pages 6943--6954, Online, November 2020. Association for
+  Computational Linguistics.
+
+\bibitem{xia2024r3thissqlme}
+Hanchen Xia, Feng Jiang, Naihao Deng, Cunxiang Wang, Guojiang Zhao, Rada
+  Mihalcea, and Yue Zhang.
+\newblock $r^3$: "this is my sql, are you with me?" a consensus-based
+  multi-agent system for text-to-sql tasks, 2024.
+
+\bibitem{nahid2026rethinkingschemalinkingcontextaware}
+Md~Mahadi~Hasan Nahid, Davood Rafiei, Weiwei Zhang, and Yong Zhang.
+\newblock Rethinking schema linking: A context-aware bidirectional retrieval
+  approach for text-to-sql, 2026.
+
+\bibitem{peng2025xsqlexpertschemalinking}
+Dazhi Peng.
+\newblock X-sql: Expert schema linking and understanding of text-to-sql with
+  multi-llms, 2025.
+
+\bibitem{xia2025chainofthoughtsurveychainofxparadigms}
+Yu~Xia, Rui Wang, Xu~Liu, Mingyan Li, Tong Yu, Xiang Chen, Julian McAuley, and
+  Shuai Li.
+\newblock Beyond chain-of-thought: A survey of chain-of-x paradigms for llms,
+  2025.
+
+\bibitem{rahmani2025selfcorrectinglargelanguagemodels}
+Hossein~A. Rahmani, Satyapriya Krishna, Xi~Wang, Mohammadmehdi Naghiaei, and
+  Emine Yilmaz.
+\newblock Self-correcting large language models: Generation vs. multiple
+  choice, 2025.
+
+\bibitem{sqlai}
+SQLAI.ai.
+\newblock Sqlai.ai -- generate sql queries in seconds for free.
+\newblock \url{https://www.sqlai.ai/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{chat2db}
+Chat2DB.
+\newblock Chat2db -- how to convert natural language to sql: A comprehensive
+  step-by-step guide.
+\newblock \url{https://chat2db.ai/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{vanna_ai}
+{Vanna AI, Inc.}
+\newblock Vanna.ai -- open-source ai sql agent.
+\newblock \url{https://vanna.ai/}.
+\newblock Ultimo accesso: 26/06/2026.
+
+\bibitem{askyourdatabase}
+{AskYourDatabase}.
+\newblock Askyourdatabase -- ai-powered business intelligence chatbot.
+\newblock \url{https://www.askyourdatabase.com/}.
+\newblock Ultimo accesso: 26/06/2026.
+
+\bibitem{text2sql}
+Text2SQL.
+\newblock Text2sql -- generate sql queries with ai.
+\newblock \url{https://text2sql.ai/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{ai2sql}
+AI2sql.
+\newblock Ai2sql -- query builder.
+\newblock \url{https://www.ai2sql.io/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{blazesql}
+BlazeSQL.
+\newblock Blazesql -- turn questions into data insights, with sql ai.
+\newblock \url{https://www.blazesql.com/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{formulabot}
+Formulabot.
+\newblock Formulabot.
+\newblock \url{https://www.formulabot.com/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{sequel}
+Sequel.
+\newblock Sequel -- ai-powered sql generation.
+\newblock \url{https://www.sequel.sh/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{sqlchat}
+SQLChat.
+\newblock Sqlchat.
+\newblock \url{https://www.sqlchat.ai/}, Ultimo accesso: 26/06/2026.
+
+\bibitem{github_project}
+Pietro Gasparini.
+\newblock Sorgente del codice del progetto di tesi.
+\newblock \url{https://github.com/Txt2SQL}, 2026.
+
+\bibitem{yu2019spiderlargescalehumanlabeleddataset}
+Tao Yu, Rui Zhang, Kai Yang, Michihiro Yasunaga, Dongxu Wang, Zifan Li, James
+  Ma, Irene Li, Qingning Yao, Shanelle Roman, Zilin Zhang, and Dragomir Radev.
+\newblock Spider: A large-scale human-labeled dataset for complex and
+  cross-domain semantic parsing and text-to-sql task, 2019.
+
+\bibitem{3666122.3667957}
+Jinyang Li, Binyuan Hui, Ge~Qu, Jiaxi Yang, Binhua Li, Bowen Li, Bailin Wang,
+  Bowen Qin, Ruiying Geng, Nan Huo, Xuanhe Zhou, Chenhao Ma, Guoliang Li,
+  Kevin~C.C. Chang, Fei Huang, Reynold Cheng, and Yongbin Li.
+\newblock Can llm already serve as a database interface? a big bench for
+  large-scale database grounded text-to-sqls.
+\newblock In {\em Proceedings of the 37th International Conference on Neural
+  Information Processing Systems}, NIPS '23, Red Hook, NY, USA, 2023. Curran
+  Associates Inc.
+
+\end{thebibliography}

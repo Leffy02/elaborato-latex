@@ -1,0 +1,233 @@
+\chapter{Conclusioni}\label{conclusioni}
+
+\section{Raggiungimento degli
+obiettivi}\label{raggiungimento-degli-obiettivi}
+
+Il presente lavoro di tesi si è posto l'obiettivo di
+superare la barriera tecnica tra il linguaggio naturale umano e la
+rigidità sintattica delle basi di dati relazionali. L'attività di
+ricerca e sviluppo si è concretizzata nella realizzazione di un
+framework basato su Python, strutturato per agire come un intermediario
+intelligente capace di orchestrare l'intero ciclo di vita di una
+richiesta text-to-SQL.
+
+L'obiettivo principale è stato perseguito attraverso l'implementazione
+di una serie di moduli interconnessi, la cui efficacia è stata
+verificata in fase sperimentale.
+
+Di seguito vengono analizzate
+nel dettaglio le soluzioni tecniche ideate per il raggiungimento
+degli obiettivi.
+
+L'obiettivo di estrarre e formalizzare la conoscenza del database è
+stato raggiunto attraverso lo sviluppo della classe
+\texttt{SchemaOrchestrator}. Questo componente gestisce l'acquisizione
+del metadato tecnico operando secondo due direttrici: l'estrazione
+diretta tramite connessione al database (\texttt{db\_conn}) o
+l'elaborazione di descrizioni testuali fornite dall'utente tramite Large
+Language Models. Il risultato di tale processo è la creazione di un
+oggetto \texttt{Schema}, che funge da rappresentazione strutturata e
+centralizzata del patrimonio informativo del database, fornendo una
+base solida per le successive fasi di generazione.
+
+Per ovviare ai limiti della finestra di contesto dei modelli linguistici, è
+stato implementato un sistema di gestione del contesto basato su
+architettura RAG. Il componente \texttt{SchemaStore} agisce come un
+database vettoriale in cui lo schema viene frammentato e immagazzinato
+sotto forma di documenti. Grazie all'integrazione di un
+retriever, il sistema è in grado di analizzare la richiesta in
+linguaggio naturale dell'utente e isolare dinamicamente solo le porzioni
+di schema (tabelle e relazioni) realmente pertinenti al contesto della
+query. Questo approccio non solo ottimizza il consumo di token, ma
+è in grado anche di ridurre il ``rumore'' informativo, migliorando
+l'accuratezza del modello.
+
+La flessibilità del sistema nella generazione del codice SQL è fornita
+dal \texttt{PromptBuilder}. Questo modulo è responsabile della
+costruzione di prompt dinamici che si adattano a molteplici variabili:
+la tipologia di sorgente dati e le specifiche necessità sintattiche del
+dialetto SQL di destinazione. Il \texttt{PromptBuilder} integra in un
+unico template la richiesta dell'utente, il contesto estratto dallo
+\texttt{SchemaStore} e, in fase di raffinamento, i feedback derivanti
+dai fallimenti precedenti, consentendo una comunicazione coerente e
+ contestualizzata con il modello linguistico.
+
+Il requisito di robustezza della query prodotta è stato soddisfatto
+mediante un ciclo iterativo di validazione e raffinamento gestito dal
+\texttt{QueryOrchestrator}. Ogni query generata viene sottoposta a una
+duplice verifica: una validazione sintattica immediata (tramite librerie
+di parsing come \texttt{sqlglot}) e, ove possibile, una validazione
+semantica attraverso l'esecuzione reale sul database. In caso di errore
+(sia esso di sintassi o di runtime), interviene la logica di
+\texttt{LLMFeedback}, che analizza l'eccezione e produce un'indicazione
+correttiva che viene reiniettata nel prompt per il tentativo successivo.
+Questo meccanismo di ``auto-correzione'' permette al sistema di imparare
+dai propri errori all'interno della medesima sessione, incrementando
+significativamente il tasso di successo finale delle interrogazioni
+generate.
+
+L'ultimo requisito essenziale, finalizzato a rendere il framework
+fruibile, modulare e facilmente integrabile all'interno di ecosistemi
+applicativi di terze parti, è stato conseguito attraverso la
+progettazione e l'implementazione di uno strato di servizi web basato
+sul framework \textbf{FastAPI}. Sfruttando le caratteristiche native di
+asincronia, validazione dei tipi e generazione automatica della
+documentazione offerte da questa tecnologia, l'intera logica di business
+è stata esposta tramite un'architettura ad \textbf{API RESTful} solida e
+ad alte prestazioni.
+
+La modularità del sistema si riflette a livello infrastrutturale
+nell'adozione di una strategia di routing distribuita. Il punto di
+ingresso dell'applicazione (\texttt{main.py}) garantisce la massima
+interoperabilità frontend e orchestra l'inclusione di router dedicati ed
+isolati, nello specifico \texttt{schema} e \texttt{query}. Questo
+approccio assicura una netta separazione delle responsabilità e una
+manutenibilità ottimale del codice sorgente. \textbf{Il router
+\texttt{schema.py}} centralizza gli endpoint dedicati alla gestione del
+ciclo di vita dei metadati. Esso espone le rotte per l'estrazione
+diretta delle strutture relazionali da istanze MySQL remote
+(\texttt{/schema/mysql}), per la generazione sintetica di schemi a
+partire da testo non strutturato mediante modelli linguistici
+(\texttt{/schema/text}) e per il raffinamento iterativo delle
+definizioni esistenti (\texttt{/schema}). \textbf{Il router
+\texttt{query.py}} si occupa invece di governare i flussi operativi di
+traduzione del linguaggio naturale. Al fine di massimizzare la
+flessibilità del framework in contesti di test o di produzione offline,
+sono stati ingegnerizzati due flussi logici distinti: l'endpoint
+\texttt{/queries/text}, deputato alla sola generazione pura del codice
+SQL isolando la componente LLM da interazioni esterne, e l'endpoint
+\texttt{/queries/mysql}, il quale estende il precedente paradigma
+abilitando l'interconnessione con il DBMS, l'esecuzione della query
+transazionale e la serializzazione formale dei record risultanti.
+
+In sintesi, la traduzione dei requisiti iniziali in un'architettura
+software funzionante ha dimostrato che l'integrazione tra modelli di
+linguaggio avanzati e sistemi di recupero delle informazioni rappresenta
+una soluzione robusta per democratizzare l'accesso ai dati, riuscendo ad ottenere
+al contempo sia la sicurezza che la correttezza formale delle interrogazioni
+eseguite.
+
+\section{Vantaggi e svantaggi}\label{vantaggi-e-svantaggi}
+
+La valutazione sistematica delle prestazioni ha permesso di delineare
+con precisione i benefici introdotti dall'architettura proposta, nonché
+i vincoli tecnologici che ancora ne limitano l'efficacia in scenari di
+produzione complessi.
+
+Il principale valore aggiunto del sistema risiede nella sua capacità di
+auto-correzione iterativa, poiché l'integrazione della modalità
+\emph{db\_conn} trasforma il framework da un semplice traduttore statico
+a un agente dinamico in grado di avvicinarsi sempre di più all'obiettivo finale.
+
+Questa architettura favorisce una netta riduzione delle allucinazioni
+sintattiche, come dimostrato da una padronanza grammaticale del
+linguaggio SQL pressoché assoluta; l'assenza di errori di sintassi
+suggerisce infatti la validità dei template di prompt e dei vincoli
+strutturali imposti ai modelli portando la media generale dei successi da \(23,78\%\) a \(45,33\%\). Al contempo, si rileva un'elevata
+efficacia del feedback loop: per modelli specializzati come
+SQLCoder il sistema agisce come un catalizzatore di precisione, poiché
+anche laddove la prima generazione fallisce, il meccanismo di cattura
+degli errori di runtime e la loro successiva re-iniezione nel prompt
+permettono di ``raddrizzare'' la query, garantendo il successo finale (da \(16,39\%\) a \(25,39\%\)).
+
+L'analisi ha inoltre evidenziato la versatilità dei modelli open-source,
+mostrando come soluzioni quali Codestral e Qwen3-Coder-Next siano in grado
+di competere con architetture proprietarie del calibro di GPT-4o in
+contesti zero-shot, offrendo un'alternativa valida, economica e
+orientata alla privacy per l'interrogazione di schemi non eccessivamente
+densi. Per i primi due si osserva \(48,46\%\) e \(55,77\%\) rispettivamente 
+mentre per i due successivi \(,54\%\) e \(61,54\%\). Di conseguenza, il 
+sistema raggiunge l'obiettivo della democratizzazione del dato, abbattendo la barriera tecnica per
+database con complessità moderata e permettendo l'estrazione di
+informazioni complesse, quali join e aggregazioni, senza la necessità di
+conoscere lo specifico dialetto SQL.
+
+Nonostante i successi prestazionali, emergono criticità strutturali
+legate principalmente alla gestione del contesto e alla latenza
+operativa.
+
+Il limite strutturale primario è rappresentato dalla sensibilità alla
+densità dello schema, specialmente nei database ampio come
+\emph{california\_schools} con 89 colonne totali, dove un numero elevato di attributi per
+singola tabella tende a saturare il contesto del modello. In questi
+scenari, il sistema fatica a distinguere tra termini semanticamente
+simili, producendo di conseguenza errori di runtime legati a nomi di
+colonne errati.
+
+A questa barriera architetturale si aggiunge un'insidiosa vulnerabilità
+legata al fenomeno del Value Mapping, emersa dall'ispezione
+approfondita dei log di sistema su domini caratterizzati da un limitato
+punteggio sulla complessità generale ma da un severo tasso di fallimento
+logico (quali \emph{real\_estate\_properties}, \emph{card\_games},
+\emph{toxicology}, \emph{thrombosis\_prediction} e \emph{superhero}). In
+questi contesti, la corretta esecuzione della query richiede
+l'applicazione di filtri restrittivi nella clausola \texttt{WHERE} su
+attributi di tipo \texttt{VARCHAR}. Tuttavia, i valori categoriali o
+testuali esatti necessari a soddisfare il predicato algebrico non sono
+specificati nella richiesta in linguaggio naturale, né sono estraibili
+dai metadati strutturali. Privi di un meccanismo di indicizzazione dei
+contenuti del database, i modelli eseguono ripetuti tentativi alla
+cieca inserendo costanti letterali plausibili ma fattualmente errate;
+in questo modo il DBMS esegue la query con successo azzerando i runtime
+error, ma restituisce un set di dati vuoto. Tale dinamica provoca una
+massiccia traslazione dei fallimenti verso la dimensione semantica,
+esaurendo inutilmente il budget di raffinamento iterativo.
+
+A questo si sommano i limiti su latenza e costi computazionali, poiché
+l'adozione di un approccio multi-tentativo, sebbene efficace per
+incrementare la precisione, penalizza in modo significativo la velocità
+di risposta; modelli come GPT-5-mini, pur risultando accurati,
+presentano tempi di inferenza che possono superare i 50 secondi su
+database complessi, rendendo l'esperienza utente meno fluida in contesti
+operativi in tempo reale.
+
+Si osserva inoltre una fragilità semantica in assenza di connessione
+nella modalità \emph{text}, in cui il sistema dipende totalmente dalla
+qualità della documentazione dello schema. Senza l'ausilio della
+connessione diretta al database, la capacità di ricostruire relazioni
+logiche profonde cala, come dimostrato dal caso limite del
+database \emph{orchestra}, evidenziando una dipendenza critica
+dall'introspezione dinamica, possedendo un delta tra le due modalità di \(43,33\%\). 
+Infine, l'analisi ha rilevato un'efficacia
+limitata del processo di raffinamento sui modelli generalisti;
+alcune architetture, pur essendo avanzate, non traggono benefici
+significativi dai tentativi aggiuntivi, mostrando una correlazione tra
+tentativi e successo vicina allo zero (esempio: Qwen3-Coder-Next). Questo fenomeno suggerisce che
+per tali agenti l'errore iniziale sia spesso di natura logica e,
+pertanto, non facilmente correggibile attraverso il solo feedback
+testuale fornito dal database.
+
+\section{Prospettive future}\label{prospettive-future}
+
+Sulla base delle criticità emerse in fase di valutazione sperimentale,
+sono state identificate diverse direttrici di ricerca e ottimizzazione
+ingegneristica volte a estendere le capacità e la robustezza del
+framework proposto.
+
+Per ovviare al crollo delle prestazioni riscontrato nei database ad alta
+densità (caratterizzati da un elevato numero di attributi per singola
+tabella), una naturale evoluzione del sistema prevede l'introduzione di
+un modulo di Reranking integrato nello \texttt{SchemaStore}, ad
+esempio mediante l'impiego di modelli Cross-Encoder. Questo approccio
+consentirebbe un filtraggio del contesto a due stadi: un primo recupero
+preliminare basato sulla similarità coseno degli embedding vettoriali,
+seguito da una fase di riordinamento semantico fine. Tale strategia
+garantirebbe l'iniezione nel prompt del solo sottoinsieme di colonne
+strettamente necessarie alla risoluzione del quesito, riducendo il consumo di token nella finestra di contesto e
+azzerando quasi totalmente gli errori di Schema Linking.
+
+Le criticità emerse nell'ambito del value mapping hanno
+evidenziato come, in assenza di informazioni puntuali sul contenuto dei
+record, i modelli linguistici non dispongano di elementi sufficienti per
+formulare correttamente i predicati di filtraggio (clausole
+\texttt{WHERE}). Una promettente linea di sviluppo consiste
+nell'ingegnerizzazione di un meccanismo di campionamento dinamico dei
+dati. All'atto della generazione del prompt, il sistema potrebbe
+interpellare direttamente il database target eseguendo query di tipo
+\texttt{SELECT\ DISTINCT} sulle colonne di tipo testuale
+(\texttt{VARCHAR} o \texttt{TEXT}) rilevanti. Valutando preventivamente
+la cardinalità e i valori effettivi di tali attributi, l'LLM verrebbe
+arricchito di una consapevolezza fattuale sul contenuto informativo del
+database. Questo approccio eliminerebbe la necessità di effettuare
+tentativi iterativi basati su valori errati o inesistenti, incrementando
+in modo significativo il tasso di successo esecutivo della query finale.

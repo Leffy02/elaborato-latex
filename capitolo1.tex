@@ -1,0 +1,278 @@
+\chapter{Stato dell'arte e Background}
+\label{cha:intro}
+
+L'ultimo decennio ha segnato un punto di svolta fondamentale nella storia
+dell'informatica, caratterizzato da una transizione senza precedenti
+verso sistemi basati sull'Intelligenza Artificiale (AI). Quella che
+inizialmente era considerata una disciplina di nicchia è evoluta in un
+pilastro tecnologico pervasivo, capace di influenzare settori che
+spaziano dalla medicina alla finanza, fino alla gestione dei dati
+strutturati.
+
+\section{Recenti scoperte ed invenzioni}\label{recenti-scoperte-ed-invenzioni}
+
+Nell'ultimo periodo abbiamo assistito alla nascita dei Large Language
+Models (LLM), come la famiglia GPT di OpenAI, Claude di Anthropic e
+modelli open-source come Llama di Meta. Questi sistemi non si limitano
+più a una mera elaborazione statistica del linguaggio, ma dimostrano
+capacità emergenti di ragionamento logico, sintesi e, in particolare,
+generazione di codice. È proprio in questo alveo di innovazione che si
+inserisce la capacità di tradurre il linguaggio naturale in linguaggi di
+programmazione o di interrogazione, aprendo la strada a interfacce
+uomo-macchina sempre più intuitive e meno dipendenti dalla conoscenza
+tecnica sintattica.
+
+L'avvento degli LLM ha tuttavia evidenziato alcuni limiti intrinseci
+legati alla natura statica del loro addestramento e alla tendenza a
+generare informazioni errate ma sintatticamente plausibili (fenomeno
+noto come allucinazione). Per superare tali vincoli e connettere
+i modelli linguistici a basi di conoscenza dinamiche, la ricerca in oggetto si è
+focalizzata sullo sviluppo di architetture capaci di operare nello
+spazio della semantica computazionale.
+
+Il cardine di questa evoluzione è rappresentato dagli embeddings, ovvero
+trasformazioni matematiche che convertono dati discreti, come parole,
+frasi o immagini, in vettori numerici continui all'interno di uno spazio
+a dimensionalità ridotta \cite{geeksforgeeks2024embeddings}. L'obiettivo fondamentale di queste
+rappresentazioni è codificare le informazioni semantiche in modo che
+elementi concettualmente simili risultino matematicamente vicini
+all'interno dello spazio vettoriale, calcolandone la distanza geometrica
+\cite{wang-etal-2024-improving-text}. A differenza dei metodi tradizionali basati sulla
+corrispondenza testuale esatta o sulle parole chiave, gli embeddings
+catturano relazioni complesse e sfumature del linguaggio, permettendo al
+sistema di comprendere il contesto e il significato profondo dell'input
+\cite{thinkia2025vectordatabases}.
+
+Su questa infrastruttura matematica si innesta il paradigma della
+Retrieval-Augmented Generation (RAG), una metodologia che potenzia i
+modelli linguistici integrando la loro memoria nativa (memoria
+parametrica) con un modulo di recupero della conoscenza esterna
+(memoria non parametrica) \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. Il processo si articola
+attraverso la sinergia di due componenti principali \cite{gupta2024comprehensivesurveyretrievalaugmentedgeneration}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Il modulo di recupero (Retriever): I documenti della base di
+  conoscenza esterna vengono frammentati, convertiti in embeddings e
+  indicizzati. All'atto dell'interrogazione, anche la query dell'utente
+  viene trasformata in un vettore, consentendo al sistema di
+  confrontarla con i documenti indicizzati e identificare le unità
+  informative semanticamente più pertinenti.
+\item
+  Il modulo di generazione (Generator): Il contesto recuperato viene
+  inserito nel prompt originale e fornito all'LLM, il quale utilizza
+  queste informazioni aggiornate per produrre una risposta accurata e
+  fattualmente fondata.
+\end{enumerate}
+
+Sotto il profilo metodologico, l'approccio RAG offre tre vantaggi
+cruciali nell'ingegneria dei sistemi basati su AI. In primo luogo,
+l'ancoraggio a documenti reali mitiga drasticamente il rischio di
+allucinazioni \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp, gupta2024comprehensivesurveyretrievalaugmentedgeneration, enwiki:1360040196}. In secondo luogo, permette un
+aggiornamento dinamico della conoscenza, poiché la memoria del sistema
+può essere espansa o revisionata modificando semplicemente l'indice dei
+vettori, senza l'oneroso bisogno di riaddestrare il modello \cite{gupta2024comprehensivesurveyretrievalaugmentedgeneration,
+lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. Infine, garantisce un'elevata efficienza computazionale,
+ottimizzando l'uso della finestra di contesto del modello generativo
+attraverso la selezione esclusiva dei sottoinsiemi di dati rilevanti
+\cite{glass2025extractiveschemalinkingtexttosql}.
+
+Da un punto di vista infrastrutturale, la gestione e l'interrogazione
+efficiente di milioni di vettori ad alta dimensionalità richiede
+tecnologie dedicate: i vector store (o database vettoriali) \cite{thinkia2025vectordatabases,
+enwiki:1360040196}. Questa tecnologia di archiviazione alimenta la ricerca
+semantica implementando algoritmi avanzati per la ricerca dei vicini più
+prossimi (come l' Approximate Nearest Neighbor), capaci di
+restituire i vettori più simili in tempi estremamente ridotti \cite{khalusova2024understanding,
+enwiki:1360040196}. All'interno dei sistemi RAG, il vector store funge da vero e
+proprio ponte logistico tra l'LLM e i repository di dati; esso memorizza
+i vettori e gestisce i relativi metadati, facilitando il filtraggio
+granulare delle informazioni e migliorando la trasparenza del sistema
+grazie alla tracciabilità e alla citazione delle fonti originali
+\cite{thinkia2025vectordatabases, enwiki:1360040196}.
+
+\section{Metodologia Text-to-SQL e Integrazione del
+RAG}\label{metodologia-text-to-sql-e-integrazione-del-rag}
+
+La traduzione Text-to-SQL rappresenta un compito cardine del
+Natural Language Processing (NLP), il cui fine è la conversione
+automatica di quesiti in linguaggio naturale (NL) in interrogazioni
+SQL eseguibili da un sistema
+di gestione di database relazionali (RDBMS) \cite{hong2025nextgenerationdatabaseinterfacessurvey, kanburoglu2024text}. Questo
+processo funge da interfaccia intuitiva verso i dati, consentendo l'estrazione di
+informazioni anche a utenti privi di competenze tecniche \cite{lei-etal-2020-examining, xia2024r3thissqlme,
+hong2025nextgenerationdatabaseinterfacessurvey}.
+
+Sotto il profilo computazionale, il problema è modellato come una sfida
+Sequence-to-Sequence (\(Seq2Seq\)), in cui l'input unisce il
+quesito dell'utente e lo schema relazionale del database per generare la
+stringa SQL corrispondente \cite{xia2024r3thissqlme, kanburoglu2024text}.
+
+Nonostante i progressi dei Large Language Models (LLM), la
+traduzione accurata sconta criticità legate all'ambiguità semantica e
+alla scalabilità degli schemi. Nei database reali, la presenza di
+centinaia di tabelle rende proibitivo l'inserimento dell'intero catalogo
+nel prompt a causa dei limiti della finestra di contesto e dei relativi costi computazionali \cite{hong2025nextgenerationdatabaseinterfacessurvey}. In questo
+scenario, l'integrazione di tecniche di Retrieval-Augmented
+Generation (RAG) costituisce una strategia determinante.
+
+L'applicazione del paradigma RAG al Text-to-SQL si realizza
+principalmente attraverso lo Schema Linking, volto ad allineare i
+termini della domanda con le entità specifiche del database \cite{lei-etal-2020-examining,
+glass2025extractiveschemalinkingtexttosql, nahid2026rethinkingschemalinkingcontextaware}. Invece di trasmettere l'intero catalogo, un modulo di
+recupero (retriever) seleziona esclusivamente il sottoinsieme di
+tabelle e colonne pertinente al quesito \cite{glass2025extractiveschemalinkingtexttosql, peng2025xsqlexpertschemalinking}. Tale approccio
+isola uno ``schema focalizzato'',
+riducendo il rumore informativo e prevenendo i fenomeni di allucinazione
+del modello (ovvero il riferimento a identificatori inesistenti)
+\cite{glass2025extractiveschemalinkingtexttosql, nahid2026rethinkingschemalinkingcontextaware}.
+
+I principali vantaggi tecnici e metodologici di questa integrazione
+includono:
+
+\begin{itemize}
+\item
+  \textbf{efficienza dei token e contrazione dei costi:} il filtraggio
+  preventivo dello schema riduce il volume di token inviati all'LLM,
+  abbattendo la latenza e ottimizzando l'impiego di modelli
+  open-weight minori; \cite{glass2025extractiveschemalinkingtexttosql, peng2025xsqlexpertschemalinking, nahid2026rethinkingschemalinkingcontextaware}
+\item
+  \textbf{precisione nello Schema Linking:} l'uso di embedding
+  vettoriali e ricerca semantica cattura relazioni latenti tra i
+  concetti espressi dall'utente e la nomenclatura tecnica, superando i
+  limiti della corrispondenza lessicale; \cite{thinkia2025vectordatabases, geeksforgeeks2024embeddings}
+\item
+  \textbf{robustezza Cross-Domain:} il framework facilita la
+  generalizzazione in modalità zero-shot su domini mai visti in
+  fase di addestramento, estraendo dinamicamente metadati aggiornati
+  senza richiedere il riaddestramento della rete; \cite{wang-etal-2024-improving-text, hong2025nextgenerationdatabaseinterfacessurvey}
+\item
+  \textbf{strategie di recupero avanzate:} approcci combinati di tipo
+  table-first (identificazione delle tabelle e poi delle colonne)
+  e column-first (selezione degli attributi per risalire alle
+  tabelle) garantiscono un'elevata recall statistica, preservando
+  gli elementi essenziali per la query. \cite{nahid2026rethinkingschemalinkingcontextaware}
+\end{itemize}
+
+L'integrazione con le tecniche RAG trasforma così il Text-to-SQL da una
+generazione stocastica ``alla cieca'' a un processo deterministico
+guidato dai dati.
+
+Oltre all'ottimizzazione del contesto, la ricerca recente ha introdotto
+guide metodologiche esplicite per strutturare i processi inferenziali
+del modello, incrementando l'accuratezza rispetto al prompting
+diretto.
+
+La tecnica cardine è il Chain-of-Thought (CoT): l'LLM viene
+istruito a esplicitare il proprio ragionamento step-by-step,
+scomponendo il problema in passaggi logici intermedi (individuazione
+delle tabelle, applicazione dei filtri e risoluzione delle giunzioni).
+\cite{xia2025chainofthoughtsurveychainofxparadigms} Questa scomposizione riduce gli errori logico-strutturali e
+ottimizza la gestione delle clausole di \texttt{JOIN} complesse.
+
+Infine, il concetto di Self-Correction istituisce un ciclo
+iterativo a ciclo chiuso in cui il sistema agisce come revisore del
+proprio output \cite{gupta2024comprehensivesurveyretrievalaugmentedgeneration, rahmani2025selfcorrectinglargelanguagemodels}. Qualora l'esecuzione sul DBMS
+sollevi un'eccezione sintattica o di runtime, il modello riceve in input
+il messaggio d'errore nativo e utilizza questo feedback informativo per
+correggere la query e riavviare l'esecuzione \cite{gupta2024comprehensivesurveyretrievalaugmentedgeneration}. Tale
+meccanismo consente di sanare query inizialmente non conformi,
+innalzando l'accuratezza esecutiva rispetto
+ai sistemi tradizionali a tentativo unico.
+
+\section{Approfondimento sui tool presenti in
+commercio}\label{approfondimento-sui-tool-presenti-in-commercio}
+
+È interessante notare come il mercato si sia diviso in due segmenti
+chiari: tool orientati alla Business Intelligence (BI) per data analyst
+e framework orientati alla produttività dello sviluppatore.
+
+L'attuale ecosistema Text-to-SQL offre una vasta gamma di interfacce web
+e agenti AI che mirano a democratizzare l'accesso ai dati. L'analisi che
+segue classifica i tool in base alla loro capacità di integrazione e
+alla raffinatezza del loro approccio al problema del contesto.
+
+Tra le soluzioni più snelle spicca SQLAI.ai, che fa della flessibilità
+nella gestione dello schema il suo tratto distintivo; permettendo sia
+l'input manuale che la connessione diretta, si pone come un supporto
+versatile per il programmatore, specialmente in contesti dove la
+sicurezza del dato è prioritaria \cite{sqlai}.
+
+Diversa è invece la strategia adottata da Chat2DB, che punta
+sull'eterogeneità del supporto: la sua architettura permette di
+interfacciare il sistema con una vasta gamma di modelli linguistici, da
+Claude a GPT, fino a modelli proprietari via API, rendendolo uno
+strumento agnostico rispetto al fornitore di IA e adatto ad ambienti
+enterprise complessi \cite{chat2db}.
+
+Sul fronte della personalizzazione e del recupero dell'informazione,
+Vanna.ai rappresenta lo stato dell'arte dei framework basati su RAG. A
+differenza di una semplice web-app, Vanna opera come una libreria Python
+che sfrutta una memoria semantica per apprendere dai metadati e dalle
+esecuzioni passate, fornendo all'utente una visione trasparente del
+processo logico \cite{vanna_ai}. Infine, l'evoluzione verso agenti autonomi è incarnata
+da AskYourDatabase \cite{askyourdatabase}. Attraverso l'introduzione della cosiddetta `Think
+Mode', il sistema esplicita il ragionamento Chain-of-Thought del
+modello, posizionandosi non solo come generatore SQL, ma come una vera e
+propria piattaforma di Business Intelligence conversazionale pronta
+all'integrazione via API.
+
+Questi strumenti mirano a eliminare completamente la barriera del
+linguaggio SQL, offrendo insight diretti e visualizzazioni. Sia
+Text2SQL.ai che AI2sql si focalizzano sulla semplicità d'uso per i non
+tecnici \cite{text2sql,ai2sql}. Mentre Text2SQL.ai eccelle nella spiegazione testuale del
+codice generato, AI2sql offre strumenti unici per la creazione di schemi
+da zero (tramite file SQL o descrizioni naturali), risultando utile
+anche in fase di progettazione del database. BlazeSQL, si posiziona come
+un assistente di alto livello per team aziendali \cite{blazesql}. Include funzionalità
+di addestramento specifico sullo schema utente tramite richieste di
+prova. Questo suggerisce l'uso di tecniche di Few-Shot Prompting per
+migliorare la precisione nel tempo in base al dominio specifico
+dell'azienda. Formula Bot e Sequel estendono il concetto di Text-to-SQL
+all'analisi documentale \cite{formulabot,sequel}. Formula Bot, in particolare, permette di unire
+dati provenienti da database SQL con file CSV e PDF, offrendo una
+visione olistica dei dati aziendali e la possibilità di scaricare i
+record analizzati. SQLchat adotta un approccio ``Bring Your Own Key'': 
+non fornisce un modello interno, ma richiede le chiavi API
+dell'utente (es. OpenAI) \cite{sqlchat}. Questo garantisce all'utente il controllo
+totale sui costi e sulle versioni del modello utilizzato, pur mantenendo
+un'interfaccia di chat intuitiva connessa al database.
+
+Dall'analisi emerge che il fattore discriminante tra un tool
+``giocattolo'' e uno professionale è la gestione del contesto (Schema
+Linking). Mentre i tool più semplici chiedono all'utente di specificare
+le tabelle (approccio manuale), i sistemi più evoluti come Vanna,
+AskYourDatabase e BlazeSQL implementano internamente architetture RAG
+per selezionare autonomamente le informazioni pertinenti, riflettendo le
+metodologie di ricerca descritte nei capitoli precedenti.
+
+L'analisi dello stato dell'arte evidenzia come il passaggio dal
+linguaggio naturale al codice SQL non sia più una sfida puramente
+sintattica, ma un complesso problema di gestione del contesto e del
+ragionamento logico. Le recenti scoperte nell'ambito dei Large Language
+Models, unite a metodologie avanzate come il Chain-of-Thought e il
+Self-Correction, hanno permesso di raggiungere livelli di precisione
+(Execution Accuracy) inimmaginabili fino a pochi anni fa. Nonostante i
+progressi compiuti dalle soluzioni commerciali e dai recenti studi
+accademici, l'analisi evidenzia il permanere di alcune criticità
+strutturali. In primo luogo, emerge una forte dipendenza dal contesto:
+l'efficacia di molti strumenti decade sensibilmente in presenza di
+schemi di database vasti e complessi, qualora non supportati da
+meccanismi di recupero (RAG) adeguatamente ottimizzati. Parallelamente,
+si riscontra una carenza in termini di robustezza operativa: la capacità
+dei sistemi di gestire autonomamente gli errori di runtime restituiti
+dal DBMS appare spesso limitata o priva della necessaria trasparenza per
+l'utente finale. Infine, un limite significativo riguarda la
+flessibilità di orchestrazione. Raramente i tool attuali offrono una
+personalizzazione profonda del flusso di lavoro, che permetta di
+separare nettamente fasi distinte come la gestione dello schema, la
+generazione della query e la successiva validazione dei risultati,
+impedendo così un controllo granulare su ogni passaggio del processo.
+Proprio in questo spazio si inserisce il lavoro di questa tesi. Sulla
+base delle fondamenta teoriche e tecnologiche analizzate in questo
+capitolo, nei capitoli successivi verrà presentata un'architettura di
+Query Orchestrator progettata per massimizzare l'affidabilità della
+traduzione attraverso un sistema modulare di gestione dello schema e un
+ciclo iterativo di raffinamento basato sui feedback in tempo reale del
+database.

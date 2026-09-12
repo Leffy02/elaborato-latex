@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Correlazioni di Spearman</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --accent: #2563eb;
+      --border: #e2e8f0;
+      --cell-bg-start: #eff6ff;
+      --cell-bg-end: #bfdbfe;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --accent: #60a5fa;
+        --border: #334155;
+        --cell-bg-start: #1e293b;
+        --cell-bg-end: #3b82f644;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #60a5fa;
+      --border: #334155;
+      --cell-bg-start: #1e293b;
+      --cell-bg-end: #3b82f644;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding-block: 40px;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      padding: 0 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      text-wrap: balance;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+    th {
+      padding: 16px 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .model-name {
+      font-weight: 500;
+    }
+    .value-cell {
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+    }
+    .legend {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    .gradient-bar {
+      width: 120px;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, var(--cell-bg-start), var(--cell-bg-end));
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Correlazioni di Spearman</h1>
+      <p class="subtitle">Riepilogo delle correlazioni delta per i sei modelli testati</p>
+    </header>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Modello</th>
+            <th style="text-align: center;">Attempts</th>
+            <th style="text-align: center;">Complexity</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span>Correlazione più debole</span>
+      <div class="gradient-bar"></div>
+      <span>Correlazione più forte</span>
+    </div>
+  </div>
+  <script>
+    const data = [
+      { model: 'Qwen3-coder-next', attempts: -0.1961, complexity: -0.0390 },
+      { model: 'codellama_34b', attempts: -0.2348, complexity: -0.0227 },
+      { model: 'codestral_22b', attempts: -0.2385, complexity: -0.0055 },
+      { model: 'gpt-4o', attempts: -0.3069, complexity: -0.2185 },
+      { model: 'gpt-5-mini', attempts: -0.1977, complexity: -0.1535 },
+      { model: 'sqlcoder_34b', attempts: -0.5381, complexity: -0.0394 },
+    ];
+    const allValues = data.flatMap(d => [d.attempts, d.complexity]);
+    const absMin = Math.min(...allValues.map(Math.abs));
+    const absMax = Math.max(...allValues.map(Math.abs));
+    const tableBody = document.getElementById('table-body');
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      const modelTd = document.createElement('td');
+      modelTd.className = 'model-name';
+      modelTd.textContent = row.model;
+      const attemptsTd = document.createElement('td');
+      attemptsTd.className = 'value-cell';
+      attemptsTd.textContent = row.attempts.toFixed(4);
+      const aInt = (Math.abs(row.attempts) - absMin) / (absMax - absMin || 1);
+      attemptsTd.style.backgroundColor = `rgba(37, 99, 235, ${aInt * 0.3})`;
+      const complexityTd = document.createElement('td');
+      complexityTd.className = 'value-cell';
+      complexityTd.textContent = row.complexity.toFixed(4);
+      const cInt = (Math.abs(row.complexity) - absMin) / (absMax - absMin || 1);
+      complexityTd.style.backgroundColor = `rgba(37, 99, 235, ${cInt * 0.3})`;
+      tr.appendChild(modelTd);
+      tr.appendChild(attemptsTd);
+      tr.appendChild(complexityTd);
+      tableBody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>

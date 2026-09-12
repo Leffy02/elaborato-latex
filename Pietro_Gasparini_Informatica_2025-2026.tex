@@ -40,7 +40,7 @@
   breaklines=true
 }
 
-\titleclass{\chapter}{straight}
+% \titleclass{\chapter}{straight}
 \titleformat{\chapter}
   {\normalfont\Huge\bfseries}{\thechapter}{1em}{}
 \titleformat{name=\chapter,numberless}
@@ -148,9 +148,16 @@
       %
       \cleardoublepage
       \input{Introduzione}
+      \cleardoublepage
       \input{capitolo1}
+      \clearpage\thispagestyle{empty}\clearpage
+      \cleardoublepage
       \input{capitolo2}
+      \clearpage\thispagestyle{empty}\clearpage
+      \cleardoublepage
       \input{capitolo3}
+      \clearpage\thispagestyle{empty}\clearpage
+      \cleardoublepage
       \input{Conclusione}
       
       
